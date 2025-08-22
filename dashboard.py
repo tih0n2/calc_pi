@@ -453,40 +453,44 @@ def main():
     filtered_records = len(df_filtered)
     filter_ratio = (filtered_records / total_records) * 100
     
-    # Строка с информацией о записях и кнопками экспорта
-    col1, col2, col3 = st.columns([3, 1, 1])
+    # Информация о записях с компактными кнопками экспорта
+    col1, col2 = st.columns([4, 1])
     
     with col1:
         st.info(f"📊 Показано {filtered_records:,} из {total_records:,} записей ({filter_ratio:.1f}%)")
     
     with col2:
-        # Экспорт в CSV
-        csv_data = df_filtered.to_csv(index=False, encoding='utf-8-sig')
-        st.download_button(
-            label="📄 CSV",
-            data=csv_data,
-            file_name=f"calcus_data_{filtered_records}_records.csv",
-            mime="text/csv",
-            help=f"Скачать {filtered_records:,} записей в формате CSV",
-            use_container_width=True
-        )
-    
-    with col3:
-        # Экспорт в Excel
-        import io
-        excel_buffer = io.BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-            df_filtered.to_excel(writer, index=False, sheet_name='Данные расчетов')
-        excel_data = excel_buffer.getvalue()
+        # Компактные кнопки экспорта в одной строке
+        subcol1, subcol2 = st.columns(2)
         
-        st.download_button(
-            label="📊 Excel",
-            data=excel_data,
-            file_name=f"calcus_data_{filtered_records}_records.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            help=f"Скачать {filtered_records:,} записей в формате Excel",
-            use_container_width=True
-        )
+        with subcol1:
+            # Экспорт в CSV
+            csv_data = df_filtered.to_csv(index=False, encoding='utf-8-sig')
+            st.download_button(
+                label="📄",
+                data=csv_data,
+                file_name=f"calcus_data_{filtered_records}_records.csv",
+                mime="text/csv",
+                help=f"Скачать CSV ({filtered_records:,} записей)",
+                use_container_width=True
+            )
+        
+        with subcol2:
+            # Экспорт в Excel
+            import io
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                df_filtered.to_excel(writer, index=False, sheet_name='Данные расчетов')
+            excel_data = excel_buffer.getvalue()
+            
+            st.download_button(
+                label="📊",
+                data=excel_data,
+                file_name=f"calcus_data_{filtered_records}_records.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                help=f"Скачать Excel ({filtered_records:,} записей)",
+                use_container_width=True
+            )
     
     # Краткая сводка по примененным фильтрам (если они отличаются от максимальных)
     filter_summary = []
