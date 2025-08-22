@@ -114,9 +114,8 @@ def convert_to_rub(amount, currency, rates):
         return amount
     return amount * rates.get(currency, 1.0)
 
-@st.cache_resource(ttl=300)  # Кэш на 5 минут
 def get_database_connection():
-    """Подключение к PostgreSQL с сертификатом"""
+    """Подключение к PostgreSQL с переподключением"""
     try:
         # Настройки подключения из переменных окружения
         connection_params = {
@@ -128,8 +127,13 @@ def get_database_connection():
             'sslmode': os.getenv('DB_SSLMODE', 'prefer'),
             'sslcert': os.getenv('DB_SSLCERT'),
             'sslkey': os.getenv('DB_SSLKEY'),
-            'sslrootcert': os.getenv('DB_SSLROOTCERT')
+            'sslrootcert': os.getenv('DB_SSLROOTCERT'),
+            'connect_timeout': 10,
+            'application_name': 'calcus_dashboard'
         }
+        
+        # Убираем None значения
+        connection_params = {k: v for k, v in connection_params.items() if v is not None}
         
         conn = psycopg2.connect(**connection_params)
         return conn
@@ -138,10 +142,36 @@ def get_database_connection():
         st.error(f"❌ Ошибка подключения к БД: {e}")
         st.stop()
 
+def execute_query_with_retry(query, max_retries=3):
+    """Выполнение запроса с переподключением при ошибке"""
+    for attempt in range(max_retries):
+        try:
+            conn = get_database_connection()
+            if conn is None:
+                raise Exception("Не удалось подключиться к базе данных")
+            
+            # Проверяем, что соединение активно
+            if conn.closed:
+                conn = get_database_connection()
+            
+            df = pd.read_sql(query, conn)
+            conn.close()
+            return df
+            
+        except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+            if attempt < max_retries - 1:
+                st.warning(f"⚠️ Переподключение к БД (попытка {attempt + 1}/{max_retries})")
+                continue
+            else:
+                st.error(f"❌ Ошибка БД после {max_retries} попыток: {e}")
+                st.stop()
+        except Exception as e:
+            st.error(f"❌ Ошибка загрузки данных: {e}")
+            st.stop()
+
 @st.cache_data(ttl=60)  # Кэш на 1 минуту для быстрых данных
 def load_data():
     """Загрузка данных из БД"""
-    conn = get_database_connection()
     
     query = """
     SELECT 
@@ -176,8 +206,8 @@ def load_data():
     ORDER BY created_at DESC
     """
     
-    df = pd.read_sql(query, conn)
-    conn.close()
+    # Используем функцию с переподключением
+    df = execute_query_with_retry(query)
     
     # Обработка данных
     df['created_at'] = pd.to_datetime(df['created_at'])
