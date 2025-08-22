@@ -227,24 +227,8 @@ def format_currency(amount, currency='RUB'):
         return f"{amount:,.0f} {currency}"
 
 def main():
-    # Получаем курсы валют для header
-    rates = get_cbr_rates()
-    
-    # Header с заголовком и курсами валют
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown('<h1 class="main-header">Аналитика Калькулятора Инвестиций</h1>', unsafe_allow_html=True)
-    
-    with col2:
-        # Курсы валют в одну строку
-        currency_info = []
-        for curr, rate in rates.items():
-            if curr != 'RUB':
-                currency_info.append(f"**{curr}:** {rate:.2f}₽")
-        
-        currency_string = " • ".join(currency_info)
-        st.markdown(f'<div style="text-align: right; padding-top: 20px; color: #666; font-size: 14px;">💱 {currency_string}</div>', unsafe_allow_html=True)
+    # Заголовок
+    st.markdown('<h1 class="main-header">Аналитика Калькулятора Инвестиций</h1>', unsafe_allow_html=True)
     
     # Загрузка данных
     with st.spinner("Загружаем данные..."):
@@ -1078,6 +1062,22 @@ def main():
         )
     
     # Информация об обновлении
+    # Курсы валют внизу боковой панели
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("💱 Курсы ЦБ РФ")
+    
+    # Получаем курсы валют
+    rates = get_cbr_rates()
+    
+    # Отображаем курсы в компактном формате
+    currency_info = []
+    for curr, rate in rates.items():
+        if curr != 'RUB':
+            currency_info.append(f"**{curr}:** {rate:.2f}₽")
+    
+    currency_string = " • ".join(currency_info)
+    st.sidebar.markdown(currency_string)
+    
     st.sidebar.markdown("---")
     st.sidebar.info(f"Последнее обновление: {datetime.now().strftime('%H:%M:%S')}")
     st.sidebar.markdown(f"**Всего записей в БД:** {len(df):,}")
