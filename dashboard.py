@@ -506,38 +506,6 @@ def main():
             help=f"Скачать {filtered_records:,} записей в формате Excel"
         )
     
-    # Предварительный просмотр данных для экспорта
-    with st.expander("🔍 Предварительный просмотр данных для экспорта", expanded=False):
-        st.write(f"**Всего записей для экспорта:** {len(df_filtered):,}")
-        
-        # Показываем список колонок
-        cols_info = []
-        for col in df_filtered.columns:
-            dtype = str(df_filtered[col].dtype)
-            null_count = df_filtered[col].isnull().sum()
-            cols_info.append({
-                'Колонка': col,
-                'Тип данных': dtype,
-                'Пустых значений': null_count
-            })
-        
-        st.write("**Структура данных:**")
-        st.dataframe(pd.DataFrame(cols_info), use_container_width=True)
-        
-        # Показываем первые несколько строк
-        st.write("**Первые 10 строк:**")
-        preview_df = df_filtered.head(10).copy()
-        
-        # Форматируем даты и суммы для лучшего отображения
-        if 'created_at' in preview_df.columns:
-            preview_df['created_at'] = preview_df['created_at'].dt.strftime('%Y-%m-%d %H:%M:%S')
-        
-        for col in ['initial_sum', 'final_amount', 'total_profit', 'target_sum']:
-            if col in preview_df.columns:
-                preview_df[col] = preview_df[col].apply(lambda x: f"{x:,.0f}₽" if pd.notna(x) else "")
-        
-        st.dataframe(preview_df, use_container_width=True)
-    
     # Конвертация в рубли если выбрано
     if convert_to_rubles:
         df_filtered = df_filtered.copy()
