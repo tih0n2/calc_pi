@@ -554,21 +554,21 @@ def main():
         """, unsafe_allow_html=True)
     
     with col3:
-        avg_initial = df_filtered['initial_sum'].mean()
+        median_initial = df_filtered['initial_sum'].median()
         currency_suffix = "₽" if convert_to_rubles else ""
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value">{avg_initial/1000000:.1f}М{currency_suffix}</div>
-            <div class="metric-label">Средняя начальная сумма</div>
+            <div class="metric-value">{median_initial/1000000:.1f}М{currency_suffix}</div>
+            <div class="metric-label">Медианная начальная сумма</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col4:
-        avg_rate = df_filtered['interest_rate'].mean()
+        median_rate = df_filtered['interest_rate'].median()
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value">{avg_rate:.1f}%</div>
-            <div class="metric-label">Средняя ставка</div>
+            <div class="metric-value">{median_rate:.1f}%</div>
+            <div class="metric-label">Медианная ставка</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -577,20 +577,20 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        avg_final = df_filtered['final_amount'].mean()
+        median_final = df_filtered['final_amount'].median()
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value">{avg_final/1000000:.1f}М{currency_suffix}</div>
-            <div class="metric-label">Средняя итоговая сумма</div>
+            <div class="metric-value">{median_final/1000000:.1f}М{currency_suffix}</div>
+            <div class="metric-label">Медианная итоговая сумма</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        avg_profit = df_filtered['total_profit'].mean()
+        median_profit = df_filtered['total_profit'].median()
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value">{avg_profit/1000000:.1f}М{currency_suffix}</div>
-            <div class="metric-label">Средняя прибыль</div>
+            <div class="metric-value">{median_profit/1000000:.1f}М{currency_suffix}</div>
+            <div class="metric-label">Медианная прибыль</div>
         </div>
         """, unsafe_allow_html=True)
     
