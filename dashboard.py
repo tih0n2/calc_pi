@@ -556,9 +556,18 @@ def main():
     with col3:
         median_initial = df_filtered['initial_sum'].median()
         currency_suffix = "₽" if convert_to_rubles else ""
+        
+        # Форматируем сумму в зависимости от размера
+        if median_initial >= 1000000:
+            formatted_value = f"{median_initial/1000000:.1f}М{currency_suffix}"
+        elif median_initial >= 1000:
+            formatted_value = f"{median_initial/1000:.0f}К{currency_suffix}"
+        else:
+            formatted_value = f"{median_initial:,.0f}{currency_suffix}"
+        
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value">{median_initial/1000000:.1f}М{currency_suffix}</div>
+            <div class="metric-value">{formatted_value}</div>
             <div class="metric-label">Медианная начальная сумма</div>
         </div>
         """, unsafe_allow_html=True)
